@@ -1,0 +1,200 @@
+<?xml version="1.0"?>
+<openerp>
+<data>
+
+<!--{{{ wizards -->
+<wizard id="wiz_make_po" model="purchase.request.line" name="make.po" string="Make PO" multi="True"/>
+<!--}}}-->
+
+<!--{{{ reports -->
+<report id="report_pr" model="purchase.request" name="purchase.request" rml="ac_purch_request/report/pr.rml" string="Purchase Request"/>
+<!--}}}-->
+
+<!--{{{ views -->
+<!--{{{ purchase.request -->
+<record id="view_pr_tree" model="ir.ui.view">
+    <field name="name">purchase.request.tree</field>
+    <field name="model">purchase.request</field>
+    <field name="type">tree</field>
+    <field name="arch" type="xml">
+        <tree string="Purchase Requests">
+            <field name="name"/>
+            <field name="required_date"/>
+            <field name="requester_id"/>
+            <field name="department_id"/>
+            <field name="state"/>
+            <field name="origin"/>
+        </tree>
+    </field>
+</record>
+
+<record id="view_pr_form" model="ir.ui.view">
+    <field name="name">purchase.request.form</field>
+    <field name="model">purchase.request</field>
+    <field name="type">form</field>
+    <field name="arch" type="xml">
+        <form string="Purchase Request">
+        	<header>
+                <button name="button_send_head" string="Send for Approval" states="draft" 	class="oe_highlight"/> 
+                <button name="button_approve" 	string="Approve" 	states="wait_approval" 	class="oe_highlight" groups="purchase.group_user_manager"/>
+                <button name="button_make_po" 	string="Make PO" 	states="approved" 		class="oe_highlight" groups="purchase.group_purchase_manager" type="object"/>
+                <button name="button_draft" 	string="To Draft" 	states="disapproved" 	class="oe_highlight" />
+                <button name="button_disapprove" string="Disapprove" states="wait_approval" groups="base.group_req_manager"/>
+                <button name="button_cancel" 	string="Cancel" 	states="draft" />
+			</header>            
+            <group>
+            	<group>
+	                <field name="name"/>
+	                <field name="date"/>
+	                <field name="requester_id"/>
+				</group>
+				<group>	                
+	                <field name="department_id"/>
+	                <field name="required_date"/>
+	                <field name="origin"/>
+				</group>                
+            </group>
+            <notebook colspan="4">
+                <page string="Request">
+                    <field name="lines" colspan="4" nolabel="1">
+                        <tree string="Request Lines" limit="10">
+                            <field name="sequence"/>
+                            <field name="name"/>
+                            <field name="qty"/>
+                            <field name="uom_id"/>
+                            <field name="required_date"/>
+                            <field name="supplier_id"/>
+                            <field name="state"/>
+                        </tree>
+                        <form string="Request Line">
+                            <notebook>
+                                <page string="Request Line">
+                                    <field name="sequence"/>
+                                    <field name="product_id" on_change="onchange_product(product_id,supplier_id,state)"/>
+                                    <field name="name"/>
+                                    <field name="qty"/>
+                                    <field name="uom_id"/>
+                                    <field name="required_date"/>
+                                    <field name="supplier_id"/>
+                                    <newline/>
+                                    <field name="state" />
+                                    <group colspan="4" col="4">
+                                        <button string="Disapprove" name="button_disapprove_head_req" states="wait_approval" type="object"/>
+                                    </group>
+                                </page>
+                                <page string="History">
+                                    <field name="po_id"/>
+                                    <field name="reserv_id"/>
+                                </page>
+                            </notebook>
+                        </form>
+                    </field>
+                </page>
+                <page string="More Info">
+                    <field name="location_id"/>
+                    <field name="ship_type" select="2"/>
+                    <separator string="Notes" colspan="4"/>
+                    <field name="notes" colspan="4" nolabel="1"/>
+                </page>
+                <page string="History">
+                    <separator string="Purchase Orders" colspan="4"/>
+                    <field name="po_ids" colspan="4" nolabel="1"/>
+                </page>
+            </notebook>
+        </form>
+    </field>
+</record>
+<!--}}}-->
+
+<!--{{{ purchase.request.line -->
+<record id="view_pr_line_tree" model="ir.ui.view">
+    <field name="name">purchase.request.line.tree</field>
+    <field name="model">purchase.request.line</field>
+    <field name="type">tree</field>
+    <field name="arch" type="xml">
+        <tree string="Purchase Request Lines">
+            <field name="sequence"/>
+            <field name="pr_id"/>
+            <field name="name"/>
+            <field name="qty"/>
+            <field name="uom_id"/>
+            <field name="required_date"/>
+            <field name="supplier_id"/>
+            <field name="state"/>
+        </tree>
+    </field>
+</record>
+
+<record id="view_pr_line_form" model="ir.ui.view">
+    <field name="name">purchase.request.line.form</field>
+    <field name="model">purchase.request.line</field>
+    <field name="type">form</field>
+    <field name="arch" type="xml">
+        <form string="Purchase Request Line">
+            <field name="sequence"/>
+            <field name="pr_id"/>
+            <field name="name"/>
+            <field name="supplier_id"/>
+            <field name="qty"/>
+            <field name="uom_id"/>
+            <field name="required_date"/>
+            <field name="state"/>
+            <field name="po_id"/>
+        </form>
+    </field>
+</record>
+<!--}}}-->
+
+<!--{{{ purchase.order -->
+<record id="view_po_form" model="ir.ui.view">
+    <field name="name">ac_purch_request.purchase.order.form</field>
+    <field name="model">purchase.order</field>
+    <field name="inherit_id" ref="purchase.purchase_order_form"/>
+    <field name="type">form</field>
+    <field name="arch" type="xml">
+        <page string="Notes" position="before">
+            <page string="History">
+                <separator string="Purchase Request Lines" colspan="4"/>
+                <field name="pr_lines" colspan="4" nolabel="1"/>
+            </page>
+        </page>
+    </field>
+</record>
+<!--}}}-->
+
+<!--{{{ mrp.procurement -->
+<record id="view_proc_form" model="ir.ui.view">
+    <field name="name">ac_purch_request.mrp.procurement.form</field>
+    <field name="model">mrp.procurement</field>
+    <field name="inherit_id" ref="mrp.mrp_procurement_form_view"/>
+    <field name="type">form</field>
+    <field name="arch" type="xml">
+        <field name="purchase_id" position="replace">
+            <field name="pr_id"/>
+        </field>
+    </field>
+</record>
+<!--}}}-->
+<!--}}}-->
+
+<!--{{{ actions -->
+<act_window id="act_view_req" res_model="purchase.request" name="Purchase Requests" view_type="form" view_mode="tree,form"/>
+
+<act_window id="act_new_req" res_model="purchase.request" name="New Purchase Request" view_type="form" view_mode="form,tree"/>
+
+<act_window id="act_link_req_line" res_model="purchase.request.line" src_model="purchase.request" name="Purchase Request Lines" domain="[('pr_id','=',active_id)]" view_type="form" view_mode="tree,form"/>
+
+<act_window id="act_view_req_line" res_model="purchase.request.line" name="Purchase Request Lines" view_type="form" view_mode="tree,form"/>
+<!--}}}-->
+
+<!--{{{ menus -->
+<menuitem id="menu_view_req" parent="purchase.menu_purchase_root" action="act_view_req" sequence="20" groups="group_req_manager,group_req_head,purchase.group_purchase_user"/>
+
+<menuitem id="menu_view_req_line" parent="menu_view_req" action="act_view_req_line" sequence="1" groups="group_req_manager"/>
+
+<menuitem id="menu_new_req" parent="purchase.menu_purchase_root" action="act_new_req" sequence="22" groups="group_req_user"/>
+<!--}}}-->
+
+</data>
+</openerp>
+<!-- vim: set fdm=marker : -->
