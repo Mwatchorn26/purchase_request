@@ -44,9 +44,11 @@
 		    <field name="name">Purchase Request User</field>
 		</record>
 		
+		<!--
 		<record id="res_roles_pr_head" model="res.roles">
 		    <field name="name">Purchase Request Head</field>
 		</record>
+		-->
 		
 		<record id="res_roles_pr_manager" model="res.roles">
 		    <field name="name">Purchase Request Manager</field>
@@ -69,11 +71,11 @@
 		    <field name="action">wkf_draft()</field>
 		</record>
 		
-		<record id="wka_wait_approval" model="workflow.activity">
+		<record id="wka_waiting_approval" model="workflow.activity">
 		    <field name="wkf_id" ref="wkf_pr"/>
-		    <field name="name">wait_approval</field>
+		    <field name="name">waiting_approval</field>
 		    <field name="kind">function</field>
-		    <field name="action">wkf_wait_approval()</field>
+		    <field name="action">wkf_waiting_approval()</field>
 		</record>
 		<!--
 		<record id="wka_wait_warehouse" model="workflow.activity">
@@ -90,11 +92,11 @@
 		    <field name="action">wkf_approved()</field>
 		</record>
 		
-		<record id="wka_disapproved" model="workflow.activity">
+		<record id="wka_rejected" model="workflow.activity">
 		    <field name="wkf_id" ref="wkf_pr"/>
-		    <field name="name">disapproved</field>
+		    <field name="name">rejected</field>
 		    <field name="kind">function</field>
-		    <field name="action">wkf_disapproved()</field>
+		    <field name="action">wkf_rejected()</field>
 		</record>
 		
 		<record id="wka_ordered" model="workflow.activity">
@@ -112,50 +114,55 @@
 		    <field name="action">wkf_received()</field>
 		</record>
 		
-		<record id="wka_canceled" model="workflow.activity">
+		<record id="wka_cancelled" model="workflow.activity">
 		    <field name="wkf_id" ref="wkf_pr"/>
-		    <field name="name">canceled</field>
+		    <field name="name">cancelled</field>
 		    <field name="flow_stop">True</field>
 		    <field name="kind">function</field>
-		    <field name="action">wkf_canceled()</field>
+		    <field name="action">wkf_cancelled()</field>
 		</record>
 		<!--}}}-->
 		
 		<!--{{{ transition -->
-		<record id="wkt_draft_send_head" model="workflow.transition">
+		<record id="wkt_draft_to_waiting_approval" model="workflow.transition">
 		    <field name="act_from" ref="wka_draft"/>
 		    <field name="act_to" ref="wka_wait_head"/>
-		    <field name="signal">button_send_head</field>
+		    <field name="signal">button_submit</field>
 		    <field name="role_id" ref="res_roles_pr_user"/>
 		</record>
 		
-		<record id="wkt_approve_head" model="workflow.transition">
-		    <field name="act_from" ref="wka_wait_head"/>
-		    <field name="act_to" ref="wka_wait_warehouse"/>
-		    <field name="signal">button_approve_head</field>
-		    <field name="role_id" ref="res_roles_pr_head"/>
+		<record id="wkt_waiting_approval_to_approved" model="workflow.transition">
+		    <field name="act_from" ref="wka_waiting_approval"/>
+		    <field name="act_to" ref="wka_approved"/>
+		    <field name="signal">button_approve</field>
+		    <field name="role_id" ref="res_roles_pr_manager"/>
+			<field name="condition">credentials_to_approve('waiting_approval')</field>
 		</record>
 		
+		<!-- 
 		<record id="wkt_approve_warehouse" model="workflow.transition">
 		    <field name="act_from" ref="wka_wait_warehouse"/>
 		    <field name="act_to" ref="wka_approved"/>
 		    <field name="signal">button_approve_warehouse</field>
 		    <field name="role_id" ref="res_roles_pr_manager"/>
-		</record>
+		</record> 
+		-->
 		
-		<record id="wkt_disapprove_head" model="workflow.transition">
-		    <field name="act_from" ref="wka_wait_head"/>
-		    <field name="act_to" ref="wka_disapproved"/>
-		    <field name="signal">button_disapprove_head</field>
-		    <field name="role_id" ref="res_roles_pr_head"/>
-		</record>
-		
-		<record id="wkt_disapprove_warehouse" model="workflow.transition">
-		    <field name="act_from" ref="wka_wait_warehouse"/>
-		    <field name="act_to" ref="wka_disapproved"/>
-		    <field name="signal">button_disapprove_warehouse</field>
+		<record id="wkt_reject" model="workflow.transition">
+		    <field name="act_from" ref="wka_waiting_approval"/>
+		    <field name="act_to" ref="wka_rejected"/>
+		    <field name="signal">button_reject</field>
 		    <field name="role_id" ref="res_roles_pr_manager"/>
 		</record>
+		
+		<!-- 
+		<record id="wkt_reject_warehouse" model="workflow.transition">
+		    <field name="act_from" ref="wka_wait_warehouse"/>
+		    <field name="act_to" ref="wka_reject"/>
+		    <field name="signal">button_reject_warehouse</field>
+		    <field name="role_id" ref="res_roles_pr_manager"/>
+		</record>
+		-->		
 		
 		<record id="wkt_ordered" model="workflow.transition">
 		    <field name="act_from" ref="wka_approved"/>
@@ -188,7 +195,7 @@
 		    <field name="role_id" ref="res_roles_pr_user"/>
 		</record>
 		
-		<record id="wkt_canceled1" model="workflow.transition">
+		<record id="wkt_cancelled" model="workflow.transition">
 		    <field name="act_from" ref="wka_draft"/>
 		    <field name="act_to" ref="wka_canceled"/>
 		    <field name="signal">button_cancel</field>

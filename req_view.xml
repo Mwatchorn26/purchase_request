@@ -3,11 +3,11 @@
 <data>
 
 <!--{{{ wizards -->
-<wizard id="wiz_make_po" model="purchase.request.line" name="make.po" string="Make PO" multi="True"/>
+<!--<wizard id="wiz_make_po" model="purchase.request.line" name="make.po" string="Make PO" multi="True"/> -->
 <!--}}}-->
 
 <!--{{{ reports -->
-<report id="report_pr" model="purchase.request" name="purchase.request" rml="ac_purch_request/report/pr.rml" string="Purchase Request"/>
+<!-- <report id="report_pr" model="purchase.request" name="purchase.request" rml="ac_purch_request/report/pr.rml" string="Purchase Request"/>-->
 <!--}}}-->
 
 <!--{{{ views -->
@@ -35,11 +35,11 @@
     <field name="arch" type="xml">
         <form string="Purchase Request">
         	<header>
-                <button name="button_send_head" string="Send for Approval" states="draft" 	class="oe_highlight"/> 
-                <button name="button_approve" 	string="Approve" 	states="wait_approval" 	class="oe_highlight" groups="purchase.group_user_manager"/>
-                <button name="button_make_po" 	string="Make PO" 	states="approved" 		class="oe_highlight" groups="purchase.group_purchase_manager" type="object"/>
-                <button name="button_draft" 	string="To Draft" 	states="disapproved" 	class="oe_highlight" />
-                <button name="button_disapprove" string="Disapprove" states="wait_approval" groups="base.group_req_manager"/>
+                <button name="button_submit" 	string="Submit" 	states="draft" 				class="oe_highlight"/> 
+                <button name="button_approve" 	string="Approve" 	states="waiting_approval" 	class="oe_highlight" groups="purchase.group_user_manager"/>
+                <button name="button_make_po" 	string="Make PO" 	states="approved" 			class="oe_highlight" groups="purchase.group_purchase_manager" type="object"/>
+                <button name="button_draft" 	string="To Draft" 	states="rejected" 			class="oe_highlight" />
+                <button name="button_reject" 	string="Reject" 	states="waiting_approval" 	groups="base.group_req_manager"/>
                 <button name="button_cancel" 	string="Cancel" 	states="draft" />
 			</header>            
             <group>
@@ -79,7 +79,7 @@
                                     <newline/>
                                     <field name="state" />
                                     <group colspan="4" col="4">
-                                        <button string="Disapprove" name="button_disapprove_head_req" states="wait_approval" type="object"/>
+                                        <button string="Reject" name="button_reject_head_req" states="wait_approval" type="object"/>
                                     </group>
                                 </page>
                                 <page string="History">
@@ -96,7 +96,7 @@
                     <separator string="Notes" colspan="4"/>
                     <field name="notes" colspan="4" nolabel="1"/>
                 </page>
-                <page string="History">
+                <page string="Associated Purchase Orders">
                     <separator string="Purchase Orders" colspan="4"/>
                     <field name="po_ids" colspan="4" nolabel="1"/>
                 </page>

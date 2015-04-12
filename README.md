@@ -9,11 +9,14 @@ This module is intended for Odoo V8. It is a partial port of ac_purch_request
 
 
 * The Purchase Request module allows interal demand to be created (by employees) 
-for material/parts to be ordered.
+  for material/parts to be ordered.
 
 * Multiple (line) items can be added to a purchase request. The purchasing
- officer can convert the items to a PO.
+  officer can convert the items to a PO.
 
 * Stay tuned for the Purchase_Request_Analytic_Accounts module, which will
- allow specific Analytic Accounts to be identified and charged against for
- various line items.
+  allow specific Analytic Accounts to be identified and charged against for
+  various line items.
+
+* Stay tuned for the Purchase_Request_Authorization module, which will allow
+  for adjustable, and multiple levels of authorization.

@@ -20,12 +20,12 @@
 {
     "name" : "Purchase requests",
     "version" : "0.1",
-    "depends" : ["base","hr","purchase","sale","mrp"],
+    "depends" : ["base","purchase","mrp", 'analytic'],
     "author" : "Transformix Engineering Inc. and Almacom (Thailand) Ltd.",
     "website" : ["http://almacom.co.th/", "http://www.transformix.com"],
     "description": """
-This module implements purchase requests.
-Requests have to be approved, after which purchase orders can be created for the requested items.
+        This module implements purchase requests.
+        Future Item: Requests have to be approved, after which purchase orders can be created for the requested items.
     """,
     "init_xml" : [
     ],

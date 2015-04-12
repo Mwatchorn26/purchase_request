@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data noupdate="1">
+	
+		<!--
+		================================================================================
+		Purchase Request manager who has the permision to select the pr to be create po
+		-->
+		<record id="group_purch_req_user" model="res.groups">
+		    <field name="name">Purchase Request / User</field>
+		</record>
+		
+		<record id="group_purch_req_manager" model="res.groups">
+		    <field name="name">Purchase Request / Validating Manager</field>
+		</record>
+		
+		<record id="group_purch_req_auth" model="res.groups">
+		    <field name="name">Purchase Request / Authorizing Manager</field>
+		</record>
+		
+		<!--
+		================================================================================
+		Purchase Request User who can create pr
+		    - PR can created from SO(Inside Sales) or Warehouse dept(Minimum stock rule)
+		-->
+		<record id="group_purch_req_user" model="res.groups">
+		    <field name="name">Purchase Request / User</field>
+		</record>
+		
+		<record id="base.group_purch_req_auth_manager" model="res.groups">
+		    <field name="name">Purchase Request / Reject Request</field>
+		</record>
+	
+	</data>
+</openerp>
