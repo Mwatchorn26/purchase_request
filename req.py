@@ -39,6 +39,7 @@ from openerp.tools.translate import _
 
 class purchase_request(models.Model):
     _name="purchase.request"
+    _inherit = ['mail.thread', 'ir.needaction_mixin']
 
 #    @api.model
 #    def copy(self, default=None):
@@ -58,33 +59,33 @@ class purchase_request(models.Model):
         for pr in self.browse(self.ids):
             vals[pr.id]=pr.lines and min([line.required_date for line in pr.lines]) or False
         return vals
-#
-#    @api.multi
-#    def _set_required_date(self,value,args):
-#        print "_set_required_date",ids
-#        if not value:
-#            return False
-#        if type(ids)!=type([]):
-#            ids=[ids]
-#        for pr in self.browse(self.ids):
-#            for line in pr.lines:
-#                line.write({"required_date":value})
-#        return True
-#
-#    @api.multi
-#    def _get_po_ids(self,name,args):
-#        vals={}
-#        for pr in self.browse(self.ids):
-#            po_ids=set([])
-#            for line in pr.lines:
-#                if line.po_id:
-#                    po_ids.add(line.po_id.id)
-#            vals[pr.id]=sorted(po_ids)
-#        return vals
+
+    @api.multi
+    def _set_required_date(self,value):
+        print "_set_required_date",ids
+#         if not value:
+#             return False
+# #         if type(ids)!=type([]):
+# #             ids=[ids]
+#         for pr in self.browse(self.ids):
+#             for line in pr.lines:
+#                 line.write({"required_date":value})
+        return True
+
+    @api.multi
+    def _get_po_ids(self):
+        vals={}
+        for pr in self.browse(self.ids):
+            po_ids=set([])
+            for line in pr.lines:
+                if line.po_id:
+                    po_ids.add(line.po_id.id)
+            vals[pr.id]=sorted(po_ids)
+        return vals
 
     name = fields.Char("Doc NO",size=64,select=1, readonly=1, default=lambda obj, cr, uid, context: '/')
     #use built-in create_date 
-    #date = fields.Date("Created",readonly=True,select=1,lambda *a: time.strftime("%Y-%m-%d"))
+    #create_date #date = fields.Date("Created", readonly=1, select=1,lambda *a: time.strftime("%Y-%m-%d"))
     required_date = fields.Date(compute='_get_required_date',fnct_inv='_set_required_date',method=True,type="date",string="Required Date")
     origin =fields.Char("Origin",size=16,select=2,readonly=1, states={'draft':[('readonly',False)]} )
     ship_type = fields.Selection([("sea","Sea"),("air","Air"),('truck','Trucking')],"Shipping Type",readonly=1,states={'draft':[('readonly',False)]})
@@ -97,8 +98,7 @@ class purchase_request(models.Model):
                                 ("rejected","Rejected"),("ordered","Ordered"),
                                 ("received","Received"),('done','Done'),("cancelled","Cancelled")],"Status",readonly=True,select=1, default= lambda *a: 'draft')
     #location_id = fields.Many2one("stock.location","Location",required=True, default='_get_location')
-#ADD BACK IN LATER:
-#    po_ids = fields.Function(_get_po_ids,method=True,type="many2many",relation="purchase.order",string="Purchase Orders")
+    po_ids = fields.Many2many(compute='_get_po_ids', comodel_name="purchase.order", string="Purchase Orders")
     
     #see hr_expense.py for source of this copy & paste
 #    amount          = fields.Function(_amount, string='Total Amount', digits_compute=dp.get_precision('Account'), 
@@ -285,6 +285,7 @@ class purchase_request(models.Model):
 
 class purchase_request_line(models.Model):
     _name="purchase.request.line"
+    _inherit = ['mail.thread', 'ir.needaction_mixin']
 
     @api.multi
     def name_get(self):
@@ -454,49 +455,49 @@ class purchase_request_line(models.Model):
 #         return res
 # #purchase_request_line()
 
-# 
-# class purchase_request_authorization(models.Model):
-#     '''
-#         This is holds the collection of authorization limits
-#     '''
-#     _inherit = 'purchase.config.settings'
-#     
-#     po_auth_base_limit = fields.Float(string='Base Limit', default=250, help="This is the default purchase request limit PER LINE ITEM for each employee")
-#     po_auth_limit_ids = fields.One2many("purchase_request_auth_limit", "po_auth_id", help="The list of people with authority, and the amount they can authorize.")
-#         
-# class purchase_request_authorization_limit(models.Model):
-#     '''
-#         This is an item in the list of people who can authorize more than the base limit on Purchase Order Requests
-#     '''
-#     _name="purchase.request.auth.limit"
-# 
-#     po_auth_id = fields.Many2one("purchase.config.settings", delegate=True)
-#     authority_id = fields.Many2one("res.users","Authority", help="This is a person who can authorize more than the base limit.")
-#     po_auth_limit = fields.Float("Authorization Limit", default=500, help="The amount the person can authorize.")
-#         
-# 
-# class purchase_order(models.Model):
-#     _inherit="purchase.order"
-#     pr_lines = fields.One2many("purchase.request.line","po_id","Purchase Request Lines",readonly=True)
-# 
-#     @api.multi
-#     def write(self,vals):
-#         res=super(purchase_order,self).write(self.env.cr,self.env.user,self.ids,vals,self.env.context)
-#         #if type(self.ids)!=type([]):
-#         #    ids=[self.ids]
-#         pr_line_ids=set([])
-#         for po in self.browse(self.ids):
-#             for pr_line in po.pr_lines:
-#                 pr_line_ids.add(pr_line.id)
-#         pr_line_ids=list(pr_line_ids)
-#         self.env("purchase.request.line").update_state(self.env.cr,self.env.user,pr_line_ids)
-#         return res
-# #purchase_order()
-# 
-# class mrp_procurement(models.Model):
-#     _inherit="mrp.procurement"
-#     pr_id = fields.Many2one("purchase.request","Purchase Request")
-# 
+ 
+class purchase_request_authorization(models.Model):
+    '''
+        This is holds the collection of authorization limits
+    '''
+    _inherit = 'purchase.config.settings'
+     
+    po_auth_base_limit = fields.Float(string='Base Limit', default=250, help="This is the default purchase request limit PER LINE ITEM for each employee")
+    po_auth_limit_ids = fields.One2many("purchase.request.auth.limit", "po_auth_id", help="The list of people with authority, and the amount they can authorize.")
+
+class purchase_request_auth_limit(models.Model):
+    '''
+        This is an item in the list of people who can authorize more than the base limit on Purchase Order Requests
+    '''
+    _name='purchase.request.auth.limit'
+ 
+    po_auth_id = fields.Many2one("purchase.config.settings", delegate=True)
+    authority_id = fields.Many2one("res.users","Authority", help="This is a person who can authorize more than the base limit.")
+    po_auth_limit = fields.Float("Authorization Limit", default=500, help="The amount the person can authorize.")
+         
+ 
+class purchase_order(models.Model):
+    _inherit="purchase.order"
+    pr_lines = fields.One2many("purchase.request.line","po_id","Purchase Request Lines",readonly=True)
+ 
+    @api.multi
+    def write(self,vals):
+        res=super(purchase_order,self).write(self.env.cr,self.env.user,self.ids,vals,self.env.context)
+        #if type(self.ids)!=type([]):
+        #    ids=[self.ids]
+        pr_line_ids=set([])
+        for po in self.browse(self.ids):
+            for pr_line in po.pr_lines:
+                pr_line_ids.add(pr_line.id)
+        pr_line_ids=list(pr_line_ids)
+        self.env("purchase.request.line").update_state(self.env.cr,self.env.user,pr_line_ids)
+        return res
+#purchase_order()
+ 
+class mrp_procurement(models.Model):
+    _inherit="procurement.order"
+    pr_id = fields.Many2one("purchase.request","Purchase Request")
+ 
 #     @api.multi
 #     def make_pr(self):
 #         purchase_id = False

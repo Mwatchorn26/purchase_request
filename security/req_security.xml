@@ -21,15 +21,15 @@
 		<!--
 		================================================================================
 		Purchase Request User who can create pr
-		    - PR can created from SO(Inside Sales) or Warehouse dept(Minimum stock rule)
+		    - PR can be created from SO(Inside Sales) or Warehouse dept(Minimum stock rule)
 		-->
 		<record id="group_purch_req_user" model="res.groups">
 		    <field name="name">Purchase Request / User</field>
 		</record>
-		
-		<record id="base.group_purch_req_auth_manager" model="res.groups">
+		<!--
+		<record id="base.group_purch_req_auth" model="res.groups">
 		    <field name="name">Purchase Request / Reject Request</field>
 		</record>
-	
+	-->
 	</data>
 </openerp>

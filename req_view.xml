@@ -21,7 +21,7 @@
             <field name="name"/>
             <field name="required_date"/>
             <field name="requester_id"/>
-            <field name="department_id"/>
+            <!-- <field name="department_id"/> -->
             <field name="state"/>
             <field name="origin"/>
         </tree>
@@ -39,17 +39,17 @@
                 <button name="button_approve" 	string="Approve" 	states="waiting_approval" 	class="oe_highlight" groups="purchase.group_user_manager"/>
                 <button name="button_make_po" 	string="Make PO" 	states="approved" 			class="oe_highlight" groups="purchase.group_purchase_manager" type="object"/>
                 <button name="button_draft" 	string="To Draft" 	states="rejected" 			class="oe_highlight" />
-                <button name="button_reject" 	string="Reject" 	states="waiting_approval" 	groups="base.group_req_manager"/>
+                <button name="button_reject" 	string="Reject" 	states="waiting_approval" 	groups="base.group_purch_req_manager"/>
                 <button name="button_cancel" 	string="Cancel" 	states="draft" />
 			</header>            
             <group>
             	<group>
 	                <field name="name"/>
-	                <field name="date"/>
+	                <field name="create_date"/>
 	                <field name="requester_id"/>
 				</group>
 				<group>	                
-	                <field name="department_id"/>
+	                <!--<field name="department_id"/>-->
 	                <field name="required_date"/>
 	                <field name="origin"/>
 				</group>                
@@ -91,8 +91,8 @@
                     </field>
                 </page>
                 <page string="More Info">
-                    <field name="location_id"/>
-                    <field name="ship_type" select="2"/>
+                    <!-- <field name="location_id"/> -->
+                    <!-- <field name="ship_type" select="2"/>-->
                     <separator string="Notes" colspan="4"/>
                     <field name="notes" colspan="4" nolabel="1"/>
                 </page>
@@ -101,6 +101,10 @@
                     <field name="po_ids" colspan="4" nolabel="1"/>
                 </page>
             </notebook>
+            <div class="oe_chatter">
+                <field name="message_follower_ids" widget="mail_followers"/>
+                <field name="message_ids" widget="mail_thread"/>
+            </div>
         </form>
     </field>
 </record>
@@ -140,6 +144,10 @@
             <field name="required_date"/>
             <field name="state"/>
             <field name="po_id"/>
+            <div class="oe_chatter">
+                <field name="message_follower_ids" widget="mail_followers"/>
+                <field name="message_ids" widget="mail_thread"/>
+            </div>            
         </form>
     </field>
 </record>
@@ -147,13 +155,13 @@
 
 <!--{{{ purchase.order -->
 <record id="view_po_form" model="ir.ui.view">
-    <field name="name">ac_purch_request.purchase.order.form</field>
+    <field name="name">purchase_request.purchase.order.form</field>
     <field name="model">purchase.order</field>
     <field name="inherit_id" ref="purchase.purchase_order_form"/>
     <field name="type">form</field>
     <field name="arch" type="xml">
-        <page string="Notes" position="before">
-            <page string="History">
+        <page string="Deliveries &amp; Invoices" position="after">
+            <page string="Purchase Request History">
                 <separator string="Purchase Request Lines" colspan="4"/>
                 <field name="pr_lines" colspan="4" nolabel="1"/>
             </page>
@@ -162,16 +170,20 @@
 </record>
 <!--}}}-->
 
-<!--{{{ mrp.procurement -->
+<!--{{{ procurement.order -->
 <record id="view_proc_form" model="ir.ui.view">
-    <field name="name">ac_purch_request.mrp.procurement.form</field>
-    <field name="model">mrp.procurement</field>
-    <field name="inherit_id" ref="mrp.mrp_procurement_form_view"/>
+    <field name="name">purchase_request.procurement.form</field>
+    <field name="model">procurement.order</field>
+    <field name="inherit_id" ref="procurement.procurement_form_view"/>
     <field name="type">form</field>
     <field name="arch" type="xml">
-        <field name="purchase_id" position="replace">
-            <field name="pr_id"/>
-        </field>
+        <notebook position="before">
+        	<group>
+        		<group>			
+		            <field name="pr_id"/>
+        		</group>
+        	</group>
+        </notebook>
     </field>
 </record>
 <!--}}}-->
@@ -188,11 +200,11 @@
 <!--}}}-->
 
 <!--{{{ menus -->
-<menuitem id="menu_view_req" parent="purchase.menu_purchase_root" action="act_view_req" sequence="20" groups="group_req_manager,group_req_head,purchase.group_purchase_user"/>
+<menuitem id="menu_view_req" parent="purchase.menu_procurement_management" action="act_view_req" sequence="20" groups="group_purch_req_manager,group_purch_req_auth,purchase.group_purchase_user"/>
 
-<menuitem id="menu_view_req_line" parent="menu_view_req" action="act_view_req_line" sequence="1" groups="group_req_manager"/>
+<menuitem id="menu_view_req_line" parent="menu_view_req" action="act_view_req_line" sequence="1" groups="group_purch_req_manager"/>
 
-<menuitem id="menu_new_req" parent="purchase.menu_purchase_root" action="act_new_req" sequence="22" groups="group_req_user"/>
+<menuitem id="menu_new_req" parent="purchase.menu_procurement_management" action="act_new_req" sequence="22" groups="group_purch_req_user"/>
 <!--}}}-->
 
 </data>

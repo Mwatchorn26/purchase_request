@@ -32,11 +32,12 @@
     "demo_xml" : [
     ],
     "update_xml" : [
-        "security/req_security.xml",
-        "security/ir.model.access.csv",
-        "req_data.xml",
-        "req_view.xml",
-        "req_workflow.xml",
+         "security/req_security.xml",
+         "security/ir.model.access.csv",
+#         "wizard/purchase_request_validate_details_view.xml",
+#         "req_data.xml",
+         "req_view.xml",
+#         "req_workflow.xml",
     ],
     'active':False,
     "installable": True,
