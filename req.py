@@ -52,13 +52,13 @@ class purchase_request(models.Model):
 #        })
 #        return super(purchase_request, self).copy(default)
 #
-    @api.multi
-    def _get_required_date(self,name,args):
+    @api.one
+    def _get_required_date(self):
         print "_get_required_date"
-        vals={}
+        self.required_date={}
         for pr in self.browse(self.ids):
-            vals[pr.id]=pr.lines and min([line.required_date for line in pr.lines]) or False
-        return vals
+            self.required_date=self.lines and min([line.required_date for line in self.lines]) or False
+    
 
     @api.multi
     def _set_required_date(self,value):
@@ -70,20 +70,23 @@ class purchase_request(models.Model):
 #         for pr in self.browse(self.ids):
 #             for line in pr.lines:
 #                 line.write({"required_date":value})
-        return True
+        pass
 
-    @api.multi
+    @api.one
     def _get_po_ids(self):
-        vals={}
-        for pr in self.browse(self.ids):
-            po_ids=set([])
-            for line in pr.lines:
-                if line.po_id:
-                    po_ids.add(line.po_id.id)
-            vals[pr.id]=sorted(po_ids)
-        return vals
+        self.po_ids={}                              #Create an empty recordset
+        #for pr in self.browse(self.ids):           #For each Purchase Request Document
+#             po_ids=set([])
+        pr_po_ids={}
+        for line in self.lines:                 #For each line (in currently selected Purchase Request Document)
+            if line.po_id:                      #If a PO exists for this line
+                pr_po_ids.add(line.po_id.id)    #Add it to the collection of POs for this Purchase Request Document
+        self.po_ids=sorted(pr_po_ids)           #Return
+        
+    
+    
 
-    name = fields.Char("Doc NO",size=64,select=1, readonly=1, default=lambda obj, cr, uid, context: '/')
+    name = fields.Char("Doc NO",size=64,select=1, readonly=1, default=lambda self: self.pool.get('ir.sequence').get(self.env.cr , self.env.uid, 'purchase.request'))
     #use built-in create_date 
     #create_date #date = fields.Date("Created", readonly=1, select=1,lambda *a: time.strftime("%Y-%m-%d"))
     required_date = fields.Date(compute='_get_required_date',fnct_inv='_set_required_date',method=True,type="date",string="Required Date")
@@ -93,10 +96,10 @@ class purchase_request(models.Model):
     #department_id = fields.Many2one("hr.department","Department",readonly=True,default='_get_department')
     notes = fields.Text("Notes")
     lines = fields.One2many("purchase.request.line","pr_id","Lines" , readonly=True,states={'draft':[('readonly',False)],'approved':[('readonly',False)]})
-    state = fields.Selection([("draft","Draft"),("wait_approval","Waiting for Approval"),
+    state = fields.Selection([('draft',"Draft"),("wait_approval","Waiting for Approval"),
                                 ("approved","Approved"),
                                 ("rejected","Rejected"),("ordered","Ordered"),
-                                ("received","Received"),('done','Done'),("cancelled","Cancelled")],"Status",readonly=True,select=1, default= lambda *a: 'draft')
+                                ("received","Received"),('done','Done'),("cancelled","Cancelled")],"Status",readonly=True,select=1, default='draft')
     #location_id = fields.Many2one("stock.location","Location",required=True, default='_get_location')
     po_ids = fields.Many2many(compute='_get_po_ids', comodel_name="purchase.order", string="Purchase Orders")
     
